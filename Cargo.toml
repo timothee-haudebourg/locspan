@@ -1,0 +1,11 @@
+[package]
+name = "locspan"
+authors = ["Timothée Haudebourg <author@haudebourg.net>"]
+version = "0.1.0"
+edition = "2021"
+categories = ["parsing"]
+keywords = ["source", "code", "map", "span"]
+repository = "https://github.com/timothee-haudebourg/locate-syntax"
+documentation = "https://docs.rs/locate-syntax"
+license = "MIT/Apache-2.0"
+readme = "README.md"
