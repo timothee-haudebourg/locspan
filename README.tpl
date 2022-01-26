@@ -1,11 +1,5 @@
 # Code mapping utility types and traits.
 
-<table><tr>
-	<td><a href="https://docs.rs/json-ld">Documentation</a></td>
-	<td><a href="https://crates.io/crates/json-ld">Crate informations</a></td>
-	<td><a href="https://github.com/timothee-haudebourg/json-ld">Repository</a></td>
-</tr></table>
-
 {{readme}}
 
 ## License
