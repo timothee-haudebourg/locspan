@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/timothee-haudebourg/locspan/workflows/CI/badge.svg)](https://github.com/timothee-haudebourg/locspan/actions)
 [![Crate informations](https://img.shields.io/crates/v/locspan.svg?style=flat-square)](https://crates.io/crates/locspan)
-![Crate informations](https://img.shields.io/crates/l/locspan.svg?style=flat-square)
+[![License](https://img.shields.io/crates/l/locspan.svg?style=flat-square)](https://github.com/timothee-haudebourg/locspan#license)
 [![Documentation](https://img.shields.io/badge/docs-latest-blue.svg?style=flat-square)](https://docs.rs/locspan)
 
 This library provides essentials types and trait to locate syntax elements.

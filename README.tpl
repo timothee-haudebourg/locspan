@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/timothee-haudebourg/{{crate}}/workflows/CI/badge.svg)](https://github.com/timothee-haudebourg/locspan/actions)
 [![Crate informations](https://img.shields.io/crates/v/{{crate}}.svg?style=flat-square)](https://crates.io/crates/locspan)
-![Crate informations](https://img.shields.io/crates/l/{{crate}}.svg?style=flat-square)
+[![License](https://img.shields.io/crates/l/{{crate}}.svg?style=flat-square)](https://github.com/timothee-haudebourg/{{crate}}#license)
 [![Documentation](https://img.shields.io/badge/docs-latest-blue.svg?style=flat-square)](https://docs.rs/locspan)
 
 {{readme}}
