@@ -11,6 +11,9 @@ mod loc;
 mod location;
 mod span;
 
+#[cfg(feature = "reporting")]
+mod reporting;
+
 pub use loc::*;
 pub use location::*;
 pub use span::*;

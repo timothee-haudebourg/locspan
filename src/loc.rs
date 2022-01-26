@@ -1,4 +1,4 @@
-use crate::Location;
+use crate::{Location, Span};
 use std::borrow::{Borrow, BorrowMut};
 use std::ops::{Deref, DerefMut};
 
@@ -45,6 +45,16 @@ impl<T, F> Loc<T, F> {
 	/// Returns a mutable reference to the value's location.
 	pub fn location_mut(&mut self) -> &mut Location<F> {
 		&mut self.1
+	}
+
+	/// Returns the value's span.
+	pub fn span(&self) -> Span {
+		self.1.span()
+	}
+
+	/// Returns a reference to the value's source file.
+	pub fn file(&self) -> &F {
+		self.1.file()
 	}
 
 	/// Maps the inner value.

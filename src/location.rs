@@ -21,6 +21,12 @@ impl<F> Location<F> {
 		}
 	}
 
+	/// Consumes this location and returns a pair
+	/// containing the file and span.
+	pub fn into_parts(self) -> (F, Span) {
+		(self.file, self.span)
+	}
+
 	/// Returns a reference to the file's identifier.
 	pub fn file(&self) -> &F {
 		&self.file
