@@ -52,9 +52,29 @@ impl<T, F> Loc<T, F> {
 		self.1.span()
 	}
 
+	/// Returns a mutable reference the value's span.
+	pub fn span_mut(&mut self) -> &mut Span {
+		self.1.span_mut()
+	}
+
+	/// Sets the value's span and returns the previous one.
+	pub fn set_span(&mut self, span: Span) -> Span {
+		self.1.set_span(span)
+	}
+
 	/// Returns a reference to the value's source file.
 	pub fn file(&self) -> &F {
 		self.1.file()
+	}
+
+	/// Returns a mutable reference to the value's source file.
+	pub fn file_mut(&mut self) -> &mut F {
+		self.1.file_mut()
+	}
+
+	/// Sets the value's file and returns the previous one.
+	pub fn set_file(&mut self, file: F) -> F {
+		self.1.set_file(file)
 	}
 
 	/// Maps the inner value.

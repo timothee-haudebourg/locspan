@@ -32,9 +32,31 @@ impl<F> Location<F> {
 		&self.file
 	}
 
+	/// Returns a mutable reference to the file's identifier.
+	pub fn file_mut(&mut self) -> &mut F {
+		&mut self.file
+	}
+
+	/// Sets the file and returns the previous one.
+	pub fn set_file(&mut self, mut file: F) -> F {
+		std::mem::swap(&mut self.file, &mut file);
+		file
+	}
+
 	/// Returns the `Span` in the file.
 	pub fn span(&self) -> Span {
 		self.span
+	}
+
+	/// Returns a mutable reference to the span.
+	pub fn span_mut(&mut self) -> &mut Span {
+		&mut self.span
+	}
+
+	/// Sets the span and returns the previous one.
+	pub fn set_span(&mut self, mut span: Span) -> Span {
+		std::mem::swap(&mut self.span, &mut span);
+		span
 	}
 
 	/// Maps the file identifier.
