@@ -27,6 +27,16 @@ impl<F> Location<F> {
 		(self.file, self.span)
 	}
 
+	/// Consumes this location and returns the file.
+	pub fn into_file(self) -> F {
+		self.file
+	}
+
+	/// Consumes this location and returns the span.
+	pub fn into_span(self) -> Span {
+		self.span
+	}
+
 	/// Returns a reference to the file's identifier.
 	pub fn file(&self) -> &F {
 		&self.file
