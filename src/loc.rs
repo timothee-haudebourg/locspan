@@ -27,6 +27,16 @@ impl<T, F> Loc<T, F> {
 		self.1
 	}
 
+	/// Discards the value and returns its file.
+	pub fn into_file(self) -> F {
+		self.1.into_file()
+	}
+
+	/// Discards the value and returns its span.
+	pub fn into_span(self) -> Span {
+		self.1.into_span()
+	}
+
 	/// Returns a reference to the wrapped value.
 	pub fn value(&self) -> &T {
 		&self.0
