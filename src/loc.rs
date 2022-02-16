@@ -13,86 +13,103 @@ pub struct Loc<T, F>(pub T, pub Location<F>);
 
 impl<T, F> Loc<T, F> {
 	/// Creates a new located value.
+	#[inline(always)]
 	pub fn new(t: T, location: Location<F>) -> Self {
 		Self(t, location)
 	}
 
 	/// Unwraps the value and discard its location.
+	#[inline(always)]
 	pub fn into_value(self) -> T {
 		self.0
 	}
 
 	/// Discards the value and returns its location.
+	#[inline(always)]
 	pub fn into_location(self) -> Location<F> {
 		self.1
 	}
 
 	/// Discards the value and returns its file.
+	#[inline(always)]
 	pub fn into_file(self) -> F {
 		self.1.into_file()
 	}
 
 	/// Discards the value and returns its span.
+	#[inline(always)]
 	pub fn into_span(self) -> Span {
 		self.1.into_span()
 	}
 
 	/// Returns a reference to the wrapped value.
+	#[inline(always)]
 	pub fn value(&self) -> &T {
 		&self.0
 	}
 
 	/// Returns a mutable reference to the wrapped value.
+	#[inline(always)]
 	pub fn value_mut(&mut self) -> &mut T {
 		&mut self.0
 	}
 
 	/// Returns a reference to the value's location.
+	#[inline(always)]
 	pub fn location(&self) -> &Location<F> {
 		&self.1
 	}
 
 	/// Returns a mutable reference to the value's location.
+	#[inline(always)]
 	pub fn location_mut(&mut self) -> &mut Location<F> {
 		&mut self.1
 	}
 
 	/// Returns the value's span.
+	#[inline(always)]
 	pub fn span(&self) -> Span {
 		self.1.span()
 	}
 
 	/// Returns a mutable reference the value's span.
+	#[inline(always)]
 	pub fn span_mut(&mut self) -> &mut Span {
 		self.1.span_mut()
 	}
 
 	/// Sets the value's span and returns the previous one.
+	#[inline(always)]
 	pub fn set_span(&mut self, span: Span) -> Span {
 		self.1.set_span(span)
 	}
 
 	/// Returns a reference to the value's source file.
+	#[inline(always)]
 	pub fn file(&self) -> &F {
 		self.1.file()
 	}
 
 	/// Returns a mutable reference to the value's source file.
+	#[inline(always)]
 	pub fn file_mut(&mut self) -> &mut F {
 		self.1.file_mut()
 	}
 
 	/// Sets the value's file and returns the previous one.
+	#[inline(always)]
 	pub fn set_file(&mut self, file: F) -> F {
 		self.1.set_file(file)
 	}
 
 	/// Maps the inner value.
+	#[inline(always)]
 	pub fn map<U>(self, f: impl FnOnce(T) -> U) -> Loc<U, F> {
 		Loc(f(self.0), self.1)
 	}
 
 	/// Converts the inner value.
+	#[inline(always)]
 	pub fn cast<U>(self) -> Loc<U, F>
 	where
 		U: From<T>,
@@ -101,11 +118,13 @@ impl<T, F> Loc<T, F> {
 	}
 
 	/// Tries to map the inner value.
+	#[inline(always)]
 	pub fn try_map<U, E>(self, f: impl FnOnce(T) -> Result<U, E>) -> Result<Loc<U, F>, E> {
 		Ok(Loc(f(self.0)?, self.1))
 	}
 
 	/// Tries to convert the inner value.
+	#[inline(always)]
 	pub fn try_cast<U>(self) -> Result<Loc<U, F>, U::Error>
 	where
 		U: TryFrom<T>,
@@ -114,11 +133,13 @@ impl<T, F> Loc<T, F> {
 	}
 
 	/// Maps the value's location.
+	#[inline(always)]
 	pub fn map_location<G>(self, f: impl FnOnce(Location<F>) -> Location<G>) -> Loc<T, G> {
 		Loc(self.0, f(self.1))
 	}
 
 	/// Maps the value's location's file.
+	#[inline(always)]
 	pub fn map_file<G>(self, f: impl FnOnce(F) -> G) -> Loc<T, G> {
 		Loc(self.0, self.1.map_file(f))
 	}
@@ -126,10 +147,12 @@ impl<T, F> Loc<T, F> {
 
 impl<T, F> Loc<Option<T>, F> {
 	/// Unwraps the inner `Option`.
+	#[inline(always)]
 	pub fn unwrap(self) -> Loc<T, F> {
 		self.map(Option::unwrap)
 	}
 
+	#[inline(always)]
 	pub fn transpose(self) -> Option<Loc<T, F>> {
 		match self.0 {
 			Some(t) => Some(Loc(t, self.1)),
@@ -141,36 +164,42 @@ impl<T, F> Loc<Option<T>, F> {
 impl<T, F> Deref for Loc<T, F> {
 	type Target = T;
 
+	#[inline(always)]
 	fn deref(&self) -> &T {
 		self.value()
 	}
 }
 
 impl<T, F> DerefMut for Loc<T, F> {
+	#[inline(always)]
 	fn deref_mut(&mut self) -> &mut T {
 		self.value_mut()
 	}
 }
 
 impl<T, F> AsRef<T> for Loc<T, F> {
+	#[inline(always)]
 	fn as_ref(&self) -> &T {
 		self.value()
 	}
 }
 
 impl<T, F> AsMut<T> for Loc<T, F> {
+	#[inline(always)]
 	fn as_mut(&mut self) -> &mut T {
 		self.value_mut()
 	}
 }
 
 impl<T, F> Borrow<T> for Loc<T, F> {
+	#[inline(always)]
 	fn borrow(&self) -> &T {
 		self.value()
 	}
 }
 
 impl<T, F> BorrowMut<T> for Loc<T, F> {
+	#[inline(always)]
 	fn borrow_mut(&mut self) -> &mut T {
 		self.value_mut()
 	}
@@ -211,6 +240,7 @@ impl<T, F> TransposeLoc for Option<Loc<T, F>> {
 	type Value = T;
 	type FileId = F;
 
+	#[inline(always)]
 	fn transpose_loc(self, none_location: impl FnOnce() -> Location<F>) -> Loc<Option<T>, F> {
 		match self {
 			Some(Loc(t, loc)) => Loc(Some(t), loc),
@@ -239,6 +269,7 @@ impl<T, E> ErrAt for Result<T, E> {
 	type Value = T;
 	type Error = E;
 
+	#[inline(always)]
 	fn err_at<F>(
 		self,
 		location: impl FnOnce() -> Location<F>,
@@ -274,6 +305,7 @@ impl<T, E, F> MapLocErr for Result<T, Loc<E, F>> {
 	type Error = E;
 	type FileId = F;
 
+	#[inline(always)]
 	fn map_loc_err<G>(
 		self,
 		f: impl FnOnce(Self::Error) -> G,
