@@ -1,13 +1,13 @@
 [package]
 name = "locspan"
 authors = ["Timothée Haudebourg <author@haudebourg.net>"]
-version = "0.2.3"
+version = "0.2.4"
 edition = "2021"
 description = "Code mapping utility types and traits."
 categories = ["parsing"]
 keywords = ["source", "code", "map", "span"]
-repository = "https://github.com/timothee-haudebourg/locate-syntax"
-documentation = "https://docs.rs/locate-syntax"
+repository = "https://github.com/timothee-haudebourg/locspan"
+documentation = "https://docs.rs/locspan"
 license = "MIT/Apache-2.0"
 readme = "README.md"
 
