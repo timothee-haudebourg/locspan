@@ -76,4 +76,18 @@ impl<F> Location<F> {
 			span: self.span,
 		}
 	}
+
+	/// Sets the end of the location span to `end`, and returns itself.
+	#[inline(always)]
+	pub fn until(mut self, end: usize) -> Self {
+		self.span.set_end(end);
+		self
+	}
+
+	/// Append `span` to the location span, and returns itself.
+	#[inline(always)]
+	pub fn with(mut self, span: Span) -> Self {
+		self.span.append(span);
+		self
+	}
 }
