@@ -10,6 +10,7 @@
 mod loc;
 mod location;
 mod span;
+mod strip;
 
 #[cfg(feature = "reporting")]
 mod reporting;
@@ -17,3 +18,4 @@ mod reporting;
 pub use loc::*;
 pub use location::*;
 pub use span::*;
+pub use strip::*;
