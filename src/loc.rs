@@ -143,6 +143,71 @@ impl<T, F> Loc<T, F> {
 	pub fn map_file<G>(self, f: impl FnOnce(F) -> G) -> Loc<T, G> {
 		Loc(self.0, self.1.map_file(f))
 	}
+
+	/// Borrows the value and file.
+	#[inline(always)]
+	pub fn borrow(&self) -> Loc<&T, &F> {
+		Loc(&self.0, self.1.borrow())
+	}
+
+	/// Borrows the value and clones the file.
+	#[inline(always)]
+	pub fn borrow_value(&self) -> Loc<&T, F>
+	where
+		F: Clone,
+	{
+		Loc(&self.0, self.1.clone())
+	}
+
+	/// Borrows the file and clones the value.
+	#[inline(always)]
+	pub fn borrow_file(&self) -> Loc<T, &F>
+	where
+		T: Clone,
+	{
+		Loc(self.0.clone(), self.1.borrow())
+	}
+}
+
+impl<'t, T: Clone, F> Loc<&'t T, F> {
+	/// Clones the borrowed value and the file to return a new `Loc<T, F>`.
+	#[inline(always)]
+	pub fn cloned_value(&self) -> Loc<T, F>
+	where
+		F: Clone,
+	{
+		Loc(self.0.clone(), self.1.clone())
+	}
+
+	/// Clones the borrowed value and consume the file to return a new `Loc<T, F>`.
+	#[inline(always)]
+	pub fn into_cloned_value(self) -> Loc<T, F> {
+		Loc(self.0.clone(), self.1)
+	}
+}
+
+impl<'f, T, F: Clone> Loc<T, &'f F> {
+	/// Clones the value and the borrowed file to return a new `Loc<T, F>`.
+	#[inline(always)]
+	pub fn cloned_file(&self) -> Loc<T, F>
+	where
+		T: Clone,
+	{
+		Loc(self.0.clone(), self.1.cloned())
+	}
+
+	/// Clones the borrowed file and consumes the value to return a new `Loc<T, F>`.
+	#[inline(always)]
+	pub fn into_cloned_file(self) -> Loc<T, F> {
+		Loc(self.0, self.1.cloned())
+	}
+}
+
+impl<'t, 'f, T: Clone, F: Clone> Loc<&'t T, &'f F> {
+	/// Clones the borrowed value and file to return a new `Loc<T, F>`.
+	pub fn cloned(&self) -> Loc<T, F> {
+		Loc(self.0.clone(), self.1.cloned())
+	}
 }
 
 impl<T, F> Loc<Option<T>, F> {

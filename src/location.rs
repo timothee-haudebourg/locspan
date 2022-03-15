@@ -101,4 +101,18 @@ impl<F> Location<F> {
 		self.span.append(span);
 		self
 	}
+
+	/// Copies the span and borrows the file to create a new `Location<&F>`.
+	#[inline(always)]
+	pub fn borrow(&self) -> Location<&F> {
+		Location::new(&self.file, self.span)
+	}
+}
+
+impl<'a, F: Clone> Location<&'a F> {
+	/// Clones the borrowed file to return a new `Location<F>`.
+	#[inline(always)]
+	pub fn cloned(&self) -> Location<F> {
+		Location::new(self.file.clone(), self.span)
+	}
 }
