@@ -104,8 +104,8 @@ impl<F, S> Location<F, S> {
 	#[inline(always)]
 	pub fn cast<G, P>(self) -> Location<G, P>
 	where
-		G: From<F>,
-		P: From<S>,
+		F: Into<G>,
+		S: Into<P>,
 	{
 		Location::new(self.file.into(), self.span)
 	}
