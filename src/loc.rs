@@ -9,12 +9,12 @@ use std::ops::{Deref, DerefMut};
 ///
 /// It is a tuple struct so it can be easily deconstructed using pattern matching.
 #[derive(Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord, Debug)]
-pub struct Loc<T, F>(pub T, pub Location<F>);
+pub struct Loc<T, F, S = Span>(pub T, pub Location<F, S>);
 
-impl<T, F> Loc<T, F> {
+impl<T, F, S> Loc<T, F, S> {
 	/// Creates a new located value.
 	#[inline(always)]
-	pub fn new(t: T, location: Location<F>) -> Self {
+	pub fn new(t: T, location: Location<F, S>) -> Self {
 		Self(t, location)
 	}
 
@@ -26,7 +26,7 @@ impl<T, F> Loc<T, F> {
 
 	/// Discards the value and returns its location.
 	#[inline(always)]
-	pub fn into_location(self) -> Location<F> {
+	pub fn into_location(self) -> Location<F, S> {
 		self.1
 	}
 
@@ -38,7 +38,7 @@ impl<T, F> Loc<T, F> {
 
 	/// Discards the value and returns its span.
 	#[inline(always)]
-	pub fn into_span(self) -> Span {
+	pub fn into_span(self) -> S {
 		self.1.into_span()
 	}
 
@@ -56,31 +56,34 @@ impl<T, F> Loc<T, F> {
 
 	/// Returns a reference to the value's location.
 	#[inline(always)]
-	pub fn location(&self) -> &Location<F> {
+	pub fn location(&self) -> &Location<F, S> {
 		&self.1
 	}
 
 	/// Returns a mutable reference to the value's location.
 	#[inline(always)]
-	pub fn location_mut(&mut self) -> &mut Location<F> {
+	pub fn location_mut(&mut self) -> &mut Location<F, S> {
 		&mut self.1
 	}
 
 	/// Returns the value's span.
 	#[inline(always)]
-	pub fn span(&self) -> Span {
+	pub fn span(&self) -> S
+	where
+		S: Clone,
+	{
 		self.1.span()
 	}
 
 	/// Returns a mutable reference the value's span.
 	#[inline(always)]
-	pub fn span_mut(&mut self) -> &mut Span {
+	pub fn span_mut(&mut self) -> &mut S {
 		self.1.span_mut()
 	}
 
 	/// Sets the value's span and returns the previous one.
 	#[inline(always)]
-	pub fn set_span(&mut self, span: Span) -> Span {
+	pub fn set_span(&mut self, span: S) -> S {
 		self.1.set_span(span)
 	}
 
@@ -104,13 +107,13 @@ impl<T, F> Loc<T, F> {
 
 	/// Maps the inner value.
 	#[inline(always)]
-	pub fn map<U>(self, f: impl FnOnce(T) -> U) -> Loc<U, F> {
+	pub fn map<U>(self, f: impl FnOnce(T) -> U) -> Loc<U, F, S> {
 		Loc(f(self.0), self.1)
 	}
 
 	/// Converts the inner value.
 	#[inline(always)]
-	pub fn cast<U>(self) -> Loc<U, F>
+	pub fn cast<U>(self) -> Loc<U, F, S>
 	where
 		U: From<T>,
 	{
@@ -119,13 +122,13 @@ impl<T, F> Loc<T, F> {
 
 	/// Tries to map the inner value.
 	#[inline(always)]
-	pub fn try_map<U, E>(self, f: impl FnOnce(T) -> Result<U, E>) -> Result<Loc<U, F>, E> {
+	pub fn try_map<U, E>(self, f: impl FnOnce(T) -> Result<U, E>) -> Result<Loc<U, F, S>, E> {
 		Ok(Loc(f(self.0)?, self.1))
 	}
 
 	/// Tries to convert the inner value.
 	#[inline(always)]
-	pub fn try_cast<U>(self) -> Result<Loc<U, F>, U::Error>
+	pub fn try_cast<U>(self) -> Result<Loc<U, F, S>, U::Error>
 	where
 		U: TryFrom<T>,
 	{
@@ -134,36 +137,44 @@ impl<T, F> Loc<T, F> {
 
 	/// Maps the value's location.
 	#[inline(always)]
-	pub fn map_location<G>(self, f: impl FnOnce(Location<F>) -> Location<G>) -> Loc<T, G> {
+	pub fn map_location<G, U>(
+		self,
+		f: impl FnOnce(Location<F, S>) -> Location<G, U>,
+	) -> Loc<T, G, U> {
 		Loc(self.0, f(self.1))
 	}
 
 	/// Maps the value's location's file.
 	#[inline(always)]
-	pub fn map_file<G>(self, f: impl FnOnce(F) -> G) -> Loc<T, G> {
+	pub fn map_file<G>(self, f: impl FnOnce(F) -> G) -> Loc<T, G, S> {
 		Loc(self.0, self.1.map_file(f))
 	}
 
 	/// Borrows the value and file.
 	#[inline(always)]
-	pub fn borrow(&self) -> Loc<&T, &F> {
+	pub fn borrow(&self) -> Loc<&T, &F, S>
+	where
+		S: Clone,
+	{
 		Loc(&self.0, self.1.borrow())
 	}
 
 	/// Borrows the value and clones the file.
 	#[inline(always)]
-	pub fn borrow_value(&self) -> Loc<&T, F>
+	pub fn borrow_value(&self) -> Loc<&T, F, S>
 	where
 		F: Clone,
+		S: Clone,
 	{
 		Loc(&self.0, self.1.clone())
 	}
 
 	/// Borrows the file and clones the value.
 	#[inline(always)]
-	pub fn borrow_file(&self) -> Loc<T, &F>
+	pub fn borrow_file(&self) -> Loc<T, &F, S>
 	where
 		T: Clone,
+		S: Clone,
 	{
 		Loc(self.0.clone(), self.1.borrow())
 	}

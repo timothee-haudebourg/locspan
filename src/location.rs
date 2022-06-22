@@ -4,18 +4,18 @@ use crate::Span;
 ///
 /// Provides a file identifier (of type `F`) and a [`Span`] in this file.
 #[derive(Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord, Debug)]
-pub struct Location<F> {
+pub struct Location<F, S = Span> {
 	/// File id.
 	file: F,
 
 	/// Span.
-	span: Span,
+	span: S,
 }
 
-impl<F> Location<F> {
+impl<F, S> Location<F, S> {
 	/// Creates a new location referring to the given `span` in the given `file`.
 	#[inline(always)]
-	pub fn new(file: F, span: impl Into<Span>) -> Self {
+	pub fn new(file: F, span: impl Into<S>) -> Self {
 		Self {
 			file,
 			span: span.into(),
@@ -25,7 +25,7 @@ impl<F> Location<F> {
 	/// Consumes this location and returns a pair
 	/// containing the file and span.
 	#[inline(always)]
-	pub fn into_parts(self) -> (F, Span) {
+	pub fn into_parts(self) -> (F, S) {
 		(self.file, self.span)
 	}
 
@@ -37,7 +37,7 @@ impl<F> Location<F> {
 
 	/// Consumes this location and returns the span.
 	#[inline(always)]
-	pub fn into_span(self) -> Span {
+	pub fn into_span(self) -> S {
 		self.span
 	}
 
@@ -62,32 +62,46 @@ impl<F> Location<F> {
 
 	/// Returns the `Span` in the file.
 	#[inline(always)]
-	pub fn span(&self) -> Span {
-		self.span
+	pub fn span(&self) -> S
+	where
+		S: Clone,
+	{
+		self.span.clone()
 	}
 
 	/// Returns a mutable reference to the span.
 	#[inline(always)]
-	pub fn span_mut(&mut self) -> &mut Span {
+	pub fn span_mut(&mut self) -> &mut S {
 		&mut self.span
 	}
 
 	/// Sets the span and returns the previous one.
 	#[inline(always)]
-	pub fn set_span(&mut self, mut span: Span) -> Span {
+	pub fn set_span(&mut self, mut span: S) -> S {
 		std::mem::swap(&mut self.span, &mut span);
 		span
 	}
 
 	/// Maps the file identifier.
 	#[inline(always)]
-	pub fn map_file<G>(self, f: impl FnOnce(F) -> G) -> Location<G> {
+	pub fn map_file<G>(self, f: impl FnOnce(F) -> G) -> Location<G, S> {
 		Location {
 			file: f(self.file),
 			span: self.span,
 		}
 	}
 
+	/// Copies the span and borrows the file to create a new `Location<&F>`.
+	#[inline(always)]
+	pub fn borrow(&self) -> Location<&F, S>
+	where
+		S: Clone,
+	{
+		Location::new(&self.file, self.span.clone())
+	}
+}
+
+impl<F> Location<F> {
 	/// Sets the end of the location span to `end`, and returns itself.
 	#[inline(always)]
 	pub fn until(mut self, end: usize) -> Self {
@@ -101,18 +115,12 @@ impl<F> Location<F> {
 		self.span.append(span);
 		self
 	}
-
-	/// Copies the span and borrows the file to create a new `Location<&F>`.
-	#[inline(always)]
-	pub fn borrow(&self) -> Location<&F> {
-		Location::new(&self.file, self.span)
-	}
 }
 
-impl<'a, F: Clone> Location<&'a F> {
+impl<'a, F: Clone, S: Clone> Location<&'a F, S> {
 	/// Clones the borrowed file to return a new `Location<F>`.
 	#[inline(always)]
-	pub fn cloned(&self) -> Location<F> {
-		Location::new(self.file.clone(), self.span)
+	pub fn cloned(&self) -> Location<F, S> {
+		Location::new(self.file.clone(), self.span.clone())
 	}
 }
