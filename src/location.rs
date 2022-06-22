@@ -99,6 +99,16 @@ impl<F, S> Location<F, S> {
 	{
 		Location::new(&self.file, self.span.clone())
 	}
+
+	/// Converts the location.
+	#[inline(always)]
+	pub fn cast<G, P>(self) -> Location<G, P>
+	where
+		G: From<F>,
+		P: From<S>,
+	{
+		Location::new(self.file.into(), self.span)
+	}
 }
 
 impl<F> Location<F> {
