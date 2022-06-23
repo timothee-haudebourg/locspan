@@ -11,7 +11,7 @@ pub trait Strip {
 	fn strip(self) -> Self::Stripped;
 }
 
-impl<T: Strip, F> Strip for Loc<T, F> {
+impl<T: Strip, F, S> Strip for Loc<T, F, S> {
 	type Stripped = T::Stripped;
 
 	fn strip(self) -> Self::Stripped {
@@ -99,7 +99,7 @@ pub trait StrippedPartialEq {
 	fn stripped_eq(&self, other: &Self) -> bool;
 }
 
-impl<T: StrippedPartialEq, F> StrippedPartialEq for Loc<T, F> {
+impl<T: StrippedPartialEq, F, S> StrippedPartialEq for Loc<T, F, S> {
 	fn stripped_eq(&self, other: &Self) -> bool {
 		self.value().stripped_eq(other.value())
 	}

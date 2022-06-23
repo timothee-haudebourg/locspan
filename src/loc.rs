@@ -180,27 +180,28 @@ impl<T, F, S> Loc<T, F, S> {
 	}
 }
 
-impl<'t, T: Clone, F> Loc<&'t T, F> {
+impl<'t, T: Clone, F, S> Loc<&'t T, F, S> {
 	/// Clones the borrowed value and the file to return a new `Loc<T, F>`.
 	#[inline(always)]
-	pub fn cloned_value(&self) -> Loc<T, F>
+	pub fn cloned_value(&self) -> Loc<T, F, S>
 	where
 		F: Clone,
+		S: Clone,
 	{
 		Loc(self.0.clone(), self.1.clone())
 	}
 
 	/// Clones the borrowed value and consume the file to return a new `Loc<T, F>`.
 	#[inline(always)]
-	pub fn into_cloned_value(self) -> Loc<T, F> {
+	pub fn into_cloned_value(self) -> Loc<T, F, S> {
 		Loc(self.0.clone(), self.1)
 	}
 }
 
-impl<'f, T, F: Clone> Loc<T, &'f F> {
+impl<'f, T, F: Clone, S: Clone> Loc<T, &'f F, S> {
 	/// Clones the value and the borrowed file to return a new `Loc<T, F>`.
 	#[inline(always)]
-	pub fn cloned_file(&self) -> Loc<T, F>
+	pub fn cloned_file(&self) -> Loc<T, F, S>
 	where
 		T: Clone,
 	{
@@ -209,27 +210,27 @@ impl<'f, T, F: Clone> Loc<T, &'f F> {
 
 	/// Clones the borrowed file and consumes the value to return a new `Loc<T, F>`.
 	#[inline(always)]
-	pub fn into_cloned_file(self) -> Loc<T, F> {
+	pub fn into_cloned_file(self) -> Loc<T, F, S> {
 		Loc(self.0, self.1.cloned())
 	}
 }
 
-impl<'t, 'f, T: Clone, F: Clone> Loc<&'t T, &'f F> {
+impl<'t, 'f, T: Clone, F: Clone, S: Clone> Loc<&'t T, &'f F, S> {
 	/// Clones the borrowed value and file to return a new `Loc<T, F>`.
-	pub fn cloned(&self) -> Loc<T, F> {
+	pub fn cloned(&self) -> Loc<T, F, S> {
 		Loc(self.0.clone(), self.1.cloned())
 	}
 }
 
-impl<T, F> Loc<Option<T>, F> {
+impl<T, F, S> Loc<Option<T>, F, S> {
 	/// Unwraps the inner `Option`.
 	#[inline(always)]
-	pub fn unwrap(self) -> Loc<T, F> {
+	pub fn unwrap(self) -> Loc<T, F, S> {
 		self.map(Option::unwrap)
 	}
 
 	#[inline(always)]
-	pub fn transpose(self) -> Option<Loc<T, F>> {
+	pub fn transpose(self) -> Option<Loc<T, F, S>> {
 		match self.0 {
 			Some(t) => Some(Loc(t, self.1)),
 			None => None,
@@ -237,7 +238,7 @@ impl<T, F> Loc<Option<T>, F> {
 	}
 }
 
-impl<T, F> Deref for Loc<T, F> {
+impl<T, F, S> Deref for Loc<T, F, S> {
 	type Target = T;
 
 	#[inline(always)]
@@ -246,35 +247,35 @@ impl<T, F> Deref for Loc<T, F> {
 	}
 }
 
-impl<T, F> DerefMut for Loc<T, F> {
+impl<T, F, S> DerefMut for Loc<T, F, S> {
 	#[inline(always)]
 	fn deref_mut(&mut self) -> &mut T {
 		self.value_mut()
 	}
 }
 
-impl<T, F> AsRef<T> for Loc<T, F> {
+impl<T, F, S> AsRef<T> for Loc<T, F, S> {
 	#[inline(always)]
 	fn as_ref(&self) -> &T {
 		self.value()
 	}
 }
 
-impl<T, F> AsMut<T> for Loc<T, F> {
+impl<T, F, S> AsMut<T> for Loc<T, F, S> {
 	#[inline(always)]
 	fn as_mut(&mut self) -> &mut T {
 		self.value_mut()
 	}
 }
 
-impl<T, F> Borrow<T> for Loc<T, F> {
+impl<T, F, S> Borrow<T> for Loc<T, F, S> {
 	#[inline(always)]
 	fn borrow(&self) -> &T {
 		self.value()
 	}
 }
 
-impl<T, F> BorrowMut<T> for Loc<T, F> {
+impl<T, F, S> BorrowMut<T> for Loc<T, F, S> {
 	#[inline(always)]
 	fn borrow_mut(&mut self) -> &mut T {
 		self.value_mut()
@@ -288,11 +289,11 @@ pub trait At: Sized {
 	/// Wraps `self` inside a `Loc<Self, F>` using the given `location`.
 	///
 	/// Equivalent to `Loc(self, location)`.
-	fn at<F>(self, location: Location<F>) -> Loc<Self, F>;
+	fn at<F, S>(self, location: Location<F, S>) -> Loc<Self, F, S>;
 }
 
 impl<T> At for T {
-	fn at<F>(self, location: Location<F>) -> Loc<Self, F> {
+	fn at<F, S>(self, location: Location<F, S>) -> Loc<Self, F, S> {
 		Loc(self, location)
 	}
 }
