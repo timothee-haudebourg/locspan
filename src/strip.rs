@@ -19,6 +19,14 @@ impl<T: Strip, F> Strip for Loc<T, F> {
 	}
 }
 
+impl<T: Strip> Strip for Box<T> {
+	type Stripped = Box<T::Stripped>;
+
+	fn strip(self) -> Self::Stripped {
+		Box::new((*self).strip())
+	}
+}
+
 impl<T: Strip> Strip for Option<T> {
 	type Stripped = Option<T::Stripped>;
 
