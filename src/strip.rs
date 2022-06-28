@@ -11,7 +11,7 @@ pub trait Strip {
 	fn strip(self) -> Self::Stripped;
 }
 
-impl<T: Strip, F, S> Strip for Loc<T, F, S> {
+impl<T: Strip, F> Strip for Loc<T, F> {
 	type Stripped = T::Stripped;
 
 	fn strip(self) -> Self::Stripped {
@@ -84,7 +84,7 @@ impl<T> BorrowStripped for T {
 ///   }
 /// }
 ///
-/// let a = Loc(MyValue(0), Location::new("a", Span::new(0, 1)));
+/// let a: Loc<_, _> = Loc(MyValue(0), Location::new("a", Span::new(0, 1)));
 /// let b = Loc(MyValue(0), Location::new("b", Span::new(2, 4)));
 ///
 /// // `a` and `b` are not equals,
@@ -95,18 +95,18 @@ impl<T> BorrowStripped for T {
 /// // compare the inner values regardless of the locations.
 /// assert_eq!(a.stripped(), b.stripped());
 /// ```
-pub trait StrippedPartialEq {
-	fn stripped_eq(&self, other: &Self) -> bool;
+pub trait StrippedPartialEq<U = Self> {
+	fn stripped_eq(&self, other: &U) -> bool;
 }
 
-impl<T: StrippedPartialEq, F, S> StrippedPartialEq for Loc<T, F, S> {
-	fn stripped_eq(&self, other: &Self) -> bool {
+impl<U, G, P, T: StrippedPartialEq<U>, F, S> StrippedPartialEq<Loc<U, G, P>> for Loc<T, F, S> {
+	fn stripped_eq(&self, other: &Loc<U, G, P>) -> bool {
 		self.value().stripped_eq(other.value())
 	}
 }
 
-impl<T: StrippedPartialEq> StrippedPartialEq for Option<T> {
-	fn stripped_eq(&self, other: &Self) -> bool {
+impl<T: StrippedPartialEq<U>, U> StrippedPartialEq<Option<U>> for Option<T> {
+	fn stripped_eq(&self, other: &Option<U>) -> bool {
 		match (self, other) {
 			(Some(a), Some(b)) => a.stripped_eq(b),
 			(None, None) => true,
@@ -115,8 +115,8 @@ impl<T: StrippedPartialEq> StrippedPartialEq for Option<T> {
 	}
 }
 
-impl<T: StrippedPartialEq> StrippedPartialEq for Vec<T> {
-	fn stripped_eq(&self, other: &Self) -> bool {
+impl<T: StrippedPartialEq<U>, U> StrippedPartialEq<Vec<U>> for Vec<T> {
+	fn stripped_eq(&self, other: &Vec<U>) -> bool {
 		self.len() == other.len() && self.iter().zip(other).all(|(a, b)| a.stripped_eq(b))
 	}
 }
@@ -125,8 +125,44 @@ impl<T: StrippedPartialEq> StrippedPartialEq for Vec<T> {
 #[derive(Debug)]
 pub struct Stripped<'a, T: ?Sized>(&'a T);
 
-impl<'a, 'b, T: StrippedPartialEq> PartialEq<Stripped<'b, T>> for Stripped<'a, T> {
-	fn eq(&self, other: &Stripped<'b, T>) -> bool {
+impl<'a, 'b, T: StrippedPartialEq<U>, U> PartialEq<Stripped<'b, U>> for Stripped<'a, T> {
+	fn eq(&self, other: &Stripped<'b, U>) -> bool {
 		self.0.stripped_eq(other.0)
 	}
+}
+
+macro_rules! primitive {
+	($($id:ident),*) => {
+		$(
+			impl Strip for $id {
+				type Stripped = Self;
+
+				fn strip(self) -> Self::Stripped {
+					self
+				}
+			}
+
+			impl StrippedPartialEq for $id {
+				fn stripped_eq(&self, other: &Self) -> bool {
+					self == other
+				}
+			}
+		)*
+	};
+}
+
+primitive! {
+	bool,
+	u8,
+	u16,
+	u32,
+	u64,
+	i8,
+	i16,
+	i32,
+	i64,
+	usize,
+	isize,
+	char,
+	String
 }
