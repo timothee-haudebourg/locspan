@@ -113,6 +113,12 @@ impl<U, G, P, T: StrippedPartialEq<U>, F, S> StrippedPartialEq<Loc<U, G, P>> for
 	}
 }
 
+impl<T: StrippedPartialEq<U>, U> StrippedPartialEq<Box<U>> for Box<T> {
+	fn stripped_eq(&self, other: &Box<U>) -> bool {
+		(**self).stripped_eq(&**other)
+	}
+}
+
 impl<T: StrippedPartialEq<U>, U> StrippedPartialEq<Option<U>> for Option<T> {
 	fn stripped_eq(&self, other: &Option<U>) -> bool {
 		match (self, other) {
