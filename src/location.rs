@@ -15,11 +15,8 @@ pub struct Location<F, S = Span> {
 impl<F, S> Location<F, S> {
 	/// Creates a new location referring to the given `span` in the given `file`.
 	#[inline(always)]
-	pub fn new(file: F, span: impl Into<S>) -> Self {
-		Self {
-			file,
-			span: span.into(),
-		}
+	pub fn new(file: F, span: S) -> Self {
+		Self { file, span }
 	}
 
 	/// Consumes this location and returns a pair
@@ -107,7 +104,7 @@ impl<F, S> Location<F, S> {
 		F: Into<G>,
 		S: Into<P>,
 	{
-		Location::new(self.file.into(), self.span)
+		Location::new(self.file.into(), self.span.into())
 	}
 }
 

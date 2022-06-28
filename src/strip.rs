@@ -84,7 +84,7 @@ impl<T> BorrowStripped for T {
 ///   }
 /// }
 ///
-/// let a: Loc<_, _> = Loc(MyValue(0), Location::new("a", Span::new(0, 1)));
+/// let a = Loc(MyValue(0), Location::new("a", Span::new(0, 1)));
 /// let b = Loc(MyValue(0), Location::new("b", Span::new(2, 4)));
 ///
 /// // `a` and `b` are not equals,
