@@ -4,6 +4,18 @@ use std::{
 	hash::Hash,
 };
 
+mod eq;
+mod hash;
+mod ord;
+mod partial_eq;
+mod partial_ord;
+
+pub use eq::*;
+pub use hash::*;
+pub use ord::*;
+pub use partial_eq::*;
+pub use partial_ord::*;
+
 /// Type that can be stripped of its location information.
 pub trait Strip {
 	type Stripped;
@@ -75,75 +87,9 @@ impl<T> BorrowStripped for T {
 	}
 }
 
-/// Defines the equality of located values
-/// without considering locations.
-///
-/// ## Example
-///
-/// ```
-/// use locspan::{Loc, Span, Location, StrippedPartialEq, BorrowStripped};
-///
-/// #[derive(PartialEq, Eq, Debug)]
-/// struct MyValue(u32);
-///
-/// impl StrippedPartialEq for MyValue {
-///   fn stripped_eq(&self, other: &Self) -> bool {
-///     self == other
-///   }
-/// }
-///
-/// let a = Loc(MyValue(0), Location::new("a", Span::new(0, 1)));
-/// let b = Loc(MyValue(0), Location::new("b", Span::new(2, 4)));
-///
-/// // `a` and `b` are not equals,
-/// // because their associated `Location`s are different.
-/// assert_ne!(a, b);
-///
-/// // However using `BorrowStripped::stripped` we can
-/// // compare the inner values regardless of the locations.
-/// assert_eq!(a.stripped(), b.stripped());
-/// ```
-pub trait StrippedPartialEq<U = Self> {
-	fn stripped_eq(&self, other: &U) -> bool;
-}
-
-impl<U, G, P, T: StrippedPartialEq<U>, F, S> StrippedPartialEq<Loc<U, G, P>> for Loc<T, F, S> {
-	fn stripped_eq(&self, other: &Loc<U, G, P>) -> bool {
-		self.value().stripped_eq(other.value())
-	}
-}
-
-impl<T: StrippedPartialEq<U>, U> StrippedPartialEq<Box<U>> for Box<T> {
-	fn stripped_eq(&self, other: &Box<U>) -> bool {
-		(**self).stripped_eq(&**other)
-	}
-}
-
-impl<T: StrippedPartialEq<U>, U> StrippedPartialEq<Option<U>> for Option<T> {
-	fn stripped_eq(&self, other: &Option<U>) -> bool {
-		match (self, other) {
-			(Some(a), Some(b)) => a.stripped_eq(b),
-			(None, None) => true,
-			_ => false,
-		}
-	}
-}
-
-impl<T: StrippedPartialEq<U>, U> StrippedPartialEq<Vec<U>> for Vec<T> {
-	fn stripped_eq(&self, other: &Vec<U>) -> bool {
-		self.len() == other.len() && self.iter().zip(other).all(|(a, b)| a.stripped_eq(b))
-	}
-}
-
 /// Borrowed located value ignoring location information.
 #[derive(Debug)]
 pub struct Stripped<'a, T: ?Sized>(&'a T);
-
-impl<'a, 'b, T: StrippedPartialEq<U>, U> PartialEq<Stripped<'b, U>> for Stripped<'a, T> {
-	fn eq(&self, other: &Stripped<'b, U>) -> bool {
-		self.0.stripped_eq(other.0)
-	}
-}
 
 macro_rules! primitive {
 	($($id:ident),*) => {
@@ -156,9 +102,29 @@ macro_rules! primitive {
 				}
 			}
 
-			impl StrippedPartialEq for $id {
-				fn stripped_eq(&self, other: &Self) -> bool {
+			impl<U> StrippedPartialEq<U> for $id where $id: PartialEq<U> {
+				fn stripped_eq(&self, other: &U) -> bool {
 					self == other
+				}
+			}
+
+			impl StrippedEq for $id {}
+
+			impl<U> StrippedPartialOrd<U> for $id where $id: PartialOrd<U> {
+				fn stripped_partial_cmp(&self, other: &U) -> Option<std::cmp::Ordering> {
+					self.partial_cmp(other)
+				}
+			}
+
+			impl StrippedOrd for $id {
+				fn stripped_cmp(&self, other: &Self) -> std::cmp::Ordering {
+					self.cmp(other)
+				}
+			}
+
+			impl StrippedHash for $id {
+				fn stripped_hash<H: std::hash::Hasher>(&self, state: &mut H) {
+					self.hash(state)
 				}
 			}
 		)*
@@ -179,4 +145,35 @@ primitive! {
 	isize,
 	char,
 	String
+}
+
+macro_rules! float {
+	($($id:ident),*) => {
+		$(
+			impl Strip for $id {
+				type Stripped = Self;
+
+				fn strip(self) -> Self::Stripped {
+					self
+				}
+			}
+
+			impl<U> StrippedPartialEq<U> for $id where $id: PartialEq<U> {
+				fn stripped_eq(&self, other: &U) -> bool {
+					self == other
+				}
+			}
+
+			impl<U> StrippedPartialOrd<U> for $id where $id: PartialOrd<U> {
+				fn stripped_partial_cmp(&self, other: &U) -> Option<std::cmp::Ordering> {
+					self.partial_cmp(other)
+				}
+			}
+		)*
+	};
+}
+
+float! {
+	f32,
+	f64
 }
