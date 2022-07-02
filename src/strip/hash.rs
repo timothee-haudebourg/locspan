@@ -1,10 +1,10 @@
-use super::{Stripped, StrippedEq, StrippedPartialOrd};
+use super::Stripped;
 use crate::Loc;
 use std::hash::{Hash, Hasher};
 
 /// Defines the partial ordering of located values
 /// without considering locations.
-pub trait StrippedHash: StrippedEq + StrippedPartialOrd {
+pub trait StrippedHash {
 	fn stripped_hash<H: Hasher>(&self, state: &mut H);
 }
 
