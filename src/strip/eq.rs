@@ -5,7 +5,9 @@ use crate::Loc;
 /// without considering locations.
 pub trait StrippedEq: StrippedPartialEq {}
 
-impl<'a, T: StrippedEq> Eq for Stripped<'a, T> {}
+impl<T: StrippedEq> Eq for Stripped<T> {}
+
+impl<'t, T: StrippedEq> StrippedEq for &'t T {}
 
 impl<T: StrippedEq, F, S> StrippedEq for Loc<T, F, S> {}
 

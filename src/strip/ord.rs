@@ -8,9 +8,15 @@ pub trait StrippedOrd: StrippedEq + StrippedPartialOrd {
 	fn stripped_cmp(&self, other: &Self) -> Ordering;
 }
 
-impl<'a, T: StrippedOrd> Ord for Stripped<'a, T> {
+impl<T: StrippedOrd> Ord for Stripped<T> {
 	fn cmp(&self, other: &Self) -> Ordering {
-		self.0.stripped_cmp(other.0)
+		self.0.stripped_cmp(&other.0)
+	}
+}
+
+impl<'t, T: StrippedOrd> StrippedOrd for &'t T {
+	fn stripped_cmp(&self, other: &Self) -> Ordering {
+		T::stripped_cmp(*self, *other)
 	}
 }
 

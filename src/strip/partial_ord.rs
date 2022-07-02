@@ -8,9 +8,15 @@ pub trait StrippedPartialOrd<U: ?Sized = Self>: StrippedPartialEq<U> {
 	fn stripped_partial_cmp(&self, other: &U) -> Option<Ordering>;
 }
 
-impl<'a, 'b, T: StrippedPartialOrd<U>, U> PartialOrd<Stripped<'b, U>> for Stripped<'a, T> {
-	fn partial_cmp(&self, other: &Stripped<'b, U>) -> Option<Ordering> {
-		self.0.stripped_partial_cmp(other.0)
+impl<T: StrippedPartialOrd<U>, U> PartialOrd<Stripped<U>> for Stripped<T> {
+	fn partial_cmp(&self, other: &Stripped<U>) -> Option<Ordering> {
+		self.0.stripped_partial_cmp(&other.0)
+	}
+}
+
+impl<'u, 't, U, T: StrippedPartialOrd<U>> StrippedPartialOrd<&'u U> for &'t T {
+	fn stripped_partial_cmp(&self, other: &&'u U) -> Option<Ordering> {
+		T::stripped_partial_cmp(*self, *other)
 	}
 }
 

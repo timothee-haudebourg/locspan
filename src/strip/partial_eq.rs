@@ -33,9 +33,15 @@ pub trait StrippedPartialEq<U: ?Sized = Self> {
 	fn stripped_eq(&self, other: &U) -> bool;
 }
 
-impl<'a, 'b, T: StrippedPartialEq<U>, U> PartialEq<Stripped<'b, U>> for Stripped<'a, T> {
-	fn eq(&self, other: &Stripped<'b, U>) -> bool {
-		self.0.stripped_eq(other.0)
+impl<T: StrippedPartialEq<U>, U> PartialEq<Stripped<U>> for Stripped<T> {
+	fn eq(&self, other: &Stripped<U>) -> bool {
+		self.0.stripped_eq(&other.0)
+	}
+}
+
+impl<'u, 't, U, T: StrippedPartialEq<U>> StrippedPartialEq<&'u U> for &'t T {
+	fn stripped_eq(&self, other: &&'u U) -> bool {
+		T::stripped_eq(*self, *other)
 	}
 }
 

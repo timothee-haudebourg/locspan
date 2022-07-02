@@ -1,7 +1,10 @@
 use crate::Loc;
 use std::{
+	borrow,
 	collections::{BTreeSet, HashSet},
+	fmt,
 	hash::Hash,
+	ops,
 };
 
 mod eq;
@@ -78,18 +81,71 @@ where
 }
 
 pub trait BorrowStripped {
-	fn stripped(&self) -> Stripped<Self>;
+	fn stripped(&self) -> &Stripped<Self>;
 }
 
 impl<T> BorrowStripped for T {
-	fn stripped(&self) -> Stripped<Self> {
-		Stripped(self)
+	fn stripped(&self) -> &Stripped<Self> {
+		unsafe { core::mem::transmute(self) }
 	}
 }
 
-/// Borrowed located value ignoring location information.
-#[derive(Debug)]
-pub struct Stripped<'a, T: ?Sized>(&'a T);
+/// Wrapper to consider values without location information.
+///
+/// This wrapper can be used in combination with the `Stripped*` traits such
+/// as `StrippedPartialEq` to access and compare values ignoring code mapping
+/// metadata.
+///
+/// An owned value can directly be wrapped.
+/// Any reference `&T` can be safely converted into `&Stripped<T>` using the
+/// [`BorrowStripped::stripped`] method.
+#[derive(Clone, Copy, Debug)]
+#[repr(transparent)]
+pub struct Stripped<T: ?Sized>(pub T);
+
+impl<T: fmt::Display> fmt::Display for Stripped<T> {
+	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+		self.0.fmt(f)
+	}
+}
+
+impl<T> ops::Deref for Stripped<T> {
+	type Target = T;
+
+	fn deref(&self) -> &T {
+		&self.0
+	}
+}
+
+impl<T> ops::DerefMut for Stripped<T> {
+	fn deref_mut(&mut self) -> &mut T {
+		&mut self.0
+	}
+}
+
+impl<T> borrow::Borrow<T> for Stripped<T> {
+	fn borrow(&self) -> &T {
+		&self.0
+	}
+}
+
+impl<T> borrow::BorrowMut<T> for Stripped<T> {
+	fn borrow_mut(&mut self) -> &mut T {
+		&mut self.0
+	}
+}
+
+impl<T> AsRef<T> for Stripped<T> {
+	fn as_ref(&self) -> &T {
+		&self.0
+	}
+}
+
+impl<T> AsMut<T> for Stripped<T> {
+	fn as_mut(&mut self) -> &mut T {
+		&mut self.0
+	}
+}
 
 macro_rules! primitive {
 	($($id:ident),*) => {
