@@ -1,4 +1,4 @@
-use crate::Loc;
+use crate::Meta;
 use std::{
 	borrow,
 	collections::{BTreeSet, HashSet},
@@ -19,14 +19,14 @@ pub use ord::*;
 pub use partial_eq::*;
 pub use partial_ord::*;
 
-/// Type that can be stripped of its location information.
+/// Type that can be stripped of its metadata.
 pub trait Strip {
 	type Stripped;
 
 	fn strip(self) -> Self::Stripped;
 }
 
-impl<T: Strip, F> Strip for Loc<T, F> {
+impl<T: Strip, M> Strip for Meta<T, M> {
 	type Stripped = T::Stripped;
 
 	fn strip(self) -> Self::Stripped {
@@ -90,7 +90,7 @@ impl<T> BorrowStripped for T {
 	}
 }
 
-/// Wrapper to consider values without location information.
+/// Wrapper to consider values without metadata.
 ///
 /// This wrapper can be used in combination with the `Stripped*` traits such
 /// as `StrippedPartialEq` to access and compare values ignoring code mapping

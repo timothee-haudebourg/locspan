@@ -1,5 +1,5 @@
 use super::{Stripped, StrippedEq, StrippedPartialOrd};
-use crate::Loc;
+use crate::Meta;
 use std::cmp::{Ord, Ordering};
 
 /// Defines the partial ordering of located values
@@ -20,7 +20,7 @@ impl<'t, T: StrippedOrd> StrippedOrd for &'t T {
 	}
 }
 
-impl<T: StrippedOrd, F, S> StrippedOrd for Loc<T, F, S> {
+impl<T: StrippedOrd, M> StrippedOrd for Meta<T, M> {
 	fn stripped_cmp(&self, other: &Self) -> Ordering {
 		self.value().stripped_cmp(other.value())
 	}

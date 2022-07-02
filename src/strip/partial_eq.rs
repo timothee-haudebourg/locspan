@@ -1,8 +1,8 @@
 use super::Stripped;
-use crate::Loc;
+use crate::Meta;
 
-/// Defines the equality of located values
-/// without considering locations.
+/// Defines the equality of values
+/// without considering the metadata.
 ///
 /// ## Example
 ///
@@ -45,8 +45,8 @@ impl<'u, 't, U, T: StrippedPartialEq<U>> StrippedPartialEq<&'u U> for &'t T {
 	}
 }
 
-impl<U, G, P, T: StrippedPartialEq<U>, F, S> StrippedPartialEq<Loc<U, G, P>> for Loc<T, F, S> {
-	fn stripped_eq(&self, other: &Loc<U, G, P>) -> bool {
+impl<U, N, T: StrippedPartialEq<U>, M> StrippedPartialEq<Meta<U, N>> for Meta<T, M> {
+	fn stripped_eq(&self, other: &Meta<U, N>) -> bool {
 		self.value().stripped_eq(other.value())
 	}
 }

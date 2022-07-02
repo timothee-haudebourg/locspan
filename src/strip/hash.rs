@@ -1,5 +1,5 @@
 use super::Stripped;
-use crate::Loc;
+use crate::Meta;
 use std::hash::{Hash, Hasher};
 
 /// Defines the partial ordering of located values
@@ -20,7 +20,7 @@ impl<'t, T: StrippedHash> StrippedHash for &'t T {
 	}
 }
 
-impl<T: StrippedHash, F, S> StrippedHash for Loc<T, F, S> {
+impl<T: StrippedHash, M> StrippedHash for Meta<T, M> {
 	fn stripped_hash<H: Hasher>(&self, state: &mut H) {
 		self.value().stripped_hash(state)
 	}
