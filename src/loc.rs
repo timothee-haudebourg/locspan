@@ -9,6 +9,7 @@ pub type Loc<T, F, S = Span> = Meta<T, Location<F, S>>;
 /// Build a data with `Location` metadata.
 #[allow(non_snake_case)]
 #[doc(hidden)]
+#[inline(always)]
 pub fn Loc<T, F, S>(t: T, location: Location<F, S>) -> Loc<T, F, S> {
 	Meta(t, location)
 }

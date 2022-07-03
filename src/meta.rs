@@ -82,6 +82,39 @@ impl<T, M> Meta<T, M> {
 		Ok(Meta(self.0.try_into()?, self.1))
 	}
 
+	/// Maps the metadata.
+	#[inline(always)]
+	pub fn map_metadata<N>(self, f: impl FnOnce(M) -> N) -> Meta<T, N> {
+		Meta(self.0, f(self.1))
+	}
+
+	/// Tries to maps the metadata.
+	#[inline(always)]
+	pub fn try_map_metadata<N, E>(
+		self,
+		f: impl FnOnce(M) -> Result<N, E>,
+	) -> Result<Meta<T, N>, E> {
+		Ok(Meta(self.0, f(self.1)?))
+	}
+
+	/// Cast the metadata.
+	#[inline(always)]
+	pub fn cast_metadata<N>(self) -> Meta<T, N>
+	where
+		M: Into<N>,
+	{
+		Meta(self.0, self.1.into())
+	}
+
+	/// Tries to cast the metadata.
+	#[inline(always)]
+	pub fn try_cast_metadata<N>(self) -> Result<Meta<T, N>, M::Error>
+	where
+		M: TryInto<N>,
+	{
+		Ok(Meta(self.0, self.1.try_into()?))
+	}
+
 	/// Borrows the value and its metadata.
 	#[inline(always)]
 	pub fn borrow(&self) -> Meta<&T, &M> {
