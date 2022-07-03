@@ -88,6 +88,16 @@ impl<T, M> Meta<T, M> {
 		Meta(self.0, f(self.1))
 	}
 
+	/// Maps the metadata of a recursive data structure.
+	#[inline(always)]
+	pub fn map_metadata_recursively<N, F: FnMut(M) -> N>(self, mut f: F) -> Meta<T::Output, N>
+	where
+		T: MapMetadataRecursively<M, N>,
+	{
+		let meta = f(self.1);
+		Meta(self.0.map_metadata_recursively(f), meta)
+	}
+
 	/// Tries to maps the metadata.
 	#[inline(always)]
 	pub fn try_map_metadata<N, E>(
@@ -95,6 +105,19 @@ impl<T, M> Meta<T, M> {
 		f: impl FnOnce(M) -> Result<N, E>,
 	) -> Result<Meta<T, N>, E> {
 		Ok(Meta(self.0, f(self.1)?))
+	}
+
+	/// Tries to map the metadata of a recursive data structure.
+	#[inline(always)]
+	pub fn try_map_metadata_recursively<N, E, F: FnMut(M) -> Result<N, E>>(
+		self,
+		mut f: F,
+	) -> Result<Meta<T::Output, N>, E>
+	where
+		T: TryMapMetadataRecursively<M, N, E>,
+	{
+		let meta = f(self.1)?;
+		Ok(Meta(self.0.try_map_metadata_recursively(f)?, meta))
 	}
 
 	/// Cast the metadata.
@@ -106,6 +129,16 @@ impl<T, M> Meta<T, M> {
 		Meta(self.0, self.1.into())
 	}
 
+	/// Casts the metadata of a recursive data structure.
+	#[inline(always)]
+	pub fn cast_metadata_recursively<N>(self) -> Meta<T::Output, N>
+	where
+		T: MapMetadataRecursively<M, N>,
+		M: Into<N>,
+	{
+		self.map_metadata_recursively(M::into)
+	}
+
 	/// Tries to cast the metadata.
 	#[inline(always)]
 	pub fn try_cast_metadata<N>(self) -> Result<Meta<T, N>, M::Error>
@@ -113,6 +146,16 @@ impl<T, M> Meta<T, M> {
 		M: TryInto<N>,
 	{
 		Ok(Meta(self.0, self.1.try_into()?))
+	}
+
+	/// Tries to cast the metadata of a recursive data structure.
+	#[inline(always)]
+	pub fn try_cast_metadata_recursively<N>(self) -> Result<Meta<T::Output, N>, M::Error>
+	where
+		T: TryMapMetadataRecursively<M, N, M::Error>,
+		M: TryInto<N>,
+	{
+		self.try_map_metadata_recursively(M::try_into)
 	}
 
 	/// Borrows the value and its metadata.
@@ -238,8 +281,55 @@ pub trait At: Sized {
 }
 
 impl<T> At for T {
+	#[inline(always)]
 	fn at<M>(self, metadata: M) -> Meta<Self, M> {
 		Meta(self, metadata)
+	}
+}
+
+/// Provides a function to map the metadata inside a recursive data structure.
+pub trait MapMetadataRecursively<M, N> {
+	type Output;
+
+	/// Maps the metadata, recursively.
+	fn map_metadata_recursively<F: FnMut(M) -> N>(self, f: F) -> Self::Output;
+}
+
+impl<T, M, N> MapMetadataRecursively<M, N> for Meta<T, M>
+where
+	T: MapMetadataRecursively<M, N>,
+{
+	type Output = Meta<T::Output, N>;
+
+	#[inline(always)]
+	fn map_metadata_recursively<F: FnMut(M) -> N>(self, f: F) -> Self::Output {
+		self.map_metadata_recursively(f)
+	}
+}
+
+/// Provides a function that tries to map the metadata inside a recursive data structure.
+pub trait TryMapMetadataRecursively<M, N, E> {
+	type Output;
+
+	/// Tries to map the metadata, recursively.
+	fn try_map_metadata_recursively<F: FnMut(M) -> Result<N, E>>(
+		self,
+		f: F,
+	) -> Result<Self::Output, E>;
+}
+
+impl<T, M, N, E> TryMapMetadataRecursively<M, N, E> for Meta<T, M>
+where
+	T: TryMapMetadataRecursively<M, N, E>,
+{
+	type Output = Meta<T::Output, N>;
+
+	#[inline(always)]
+	fn try_map_metadata_recursively<F: FnMut(M) -> Result<N, E>>(
+		self,
+		f: F,
+	) -> Result<Self::Output, E> {
+		self.try_map_metadata_recursively(f)
 	}
 }
 
