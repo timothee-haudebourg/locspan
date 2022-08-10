@@ -1,4 +1,5 @@
 use std::borrow::{Borrow, BorrowMut};
+use std::fmt;
 use std::ops::{Deref, DerefMut};
 
 /// Data and its metadata.
@@ -266,6 +267,12 @@ impl<T, M> BorrowMut<T> for Meta<T, M> {
 	#[inline(always)]
 	fn borrow_mut(&mut self) -> &mut T {
 		self.value_mut()
+	}
+}
+
+impl<T: fmt::Display, M> fmt::Display for Meta<T, M> {
+	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+		self.0.fmt(f)
 	}
 }
 
