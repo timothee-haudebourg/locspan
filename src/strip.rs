@@ -103,6 +103,13 @@ impl<T> BorrowStripped for T {
 #[repr(transparent)]
 pub struct Stripped<T: ?Sized>(pub T);
 
+impl<T> Stripped<T> {
+	#[inline]
+	pub fn unwrap(self) -> T {
+		self.0
+	}
+}
+
 impl<T: fmt::Display> fmt::Display for Stripped<T> {
 	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
 		self.0.fmt(f)
