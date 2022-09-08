@@ -12,7 +12,7 @@ impl<F: Clone> Location<F> {
 	}
 }
 
-impl<F: Clone> Location<F> {
+impl<F> Location<F> {
 	#[inline(always)]
 	pub fn into_primary_label(self) -> codespan_reporting::diagnostic::Label<F> {
 		let (file, span) = self.into_parts();
