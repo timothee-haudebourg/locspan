@@ -1,4 +1,4 @@
-use crate::Span;
+use crate::{MaybeSpanned, Meta, Span, Spanned};
 
 /// Syntax element location.
 ///
@@ -129,5 +129,61 @@ impl<'a, F: Clone, S: Clone> Location<&'a F, S> {
 	#[inline(always)]
 	pub fn cloned(&self) -> Location<F, S> {
 		Location::new(self.file.clone(), self.span.clone())
+	}
+}
+
+/// Value with a location.
+pub trait Located {
+	type File;
+	type Span;
+
+	fn location(&self) -> &Location<Self::File, Self::Span>;
+}
+
+impl<T: Located> Spanned for T
+where
+	T::Span: Clone,
+{
+	type Span = T::Span;
+
+	fn span(&self) -> Self::Span {
+		self.location().span()
+	}
+}
+
+/// Value with an optional location.
+pub trait MaybeLocated {
+	type File;
+	type Span;
+
+	fn optional_location(&self) -> Option<&Location<Self::File, Self::Span>>;
+}
+
+impl<T: MaybeLocated> MaybeSpanned for T
+where
+	T::Span: Clone,
+{
+	type Span = T::Span;
+
+	fn optional_span(&self) -> Option<Self::Span> {
+		self.optional_location().map(Location::span)
+	}
+}
+
+impl<T: Located> MaybeLocated for T {
+	type File = T::File;
+	type Span = T::Span;
+
+	fn optional_location(&self) -> Option<&Location<Self::File, Self::Span>> {
+		Some(self.location())
+	}
+}
+
+impl<T, F, S> Located for Meta<T, Location<F, S>> {
+	type File = F;
+	type Span = S;
+
+	fn location(&self) -> &Location<Self::File, Self::Span> {
+		self.metadata()
 	}
 }

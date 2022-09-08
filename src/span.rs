@@ -208,3 +208,17 @@ impl IndexMut<Span> for String {
 		self.index_mut(span.range())
 	}
 }
+
+/// Value with a span.
+pub trait Spanned {
+	type Span;
+
+	fn span(&self) -> Self::Span;
+}
+
+/// Value with an optional span.
+pub trait MaybeSpanned {
+	type Span;
+
+	fn optional_span(&self) -> Option<Self::Span>;
+}
