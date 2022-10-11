@@ -14,6 +14,12 @@ impl<T: StrippedHash> Hash for Stripped<T> {
 	}
 }
 
+impl<T: StrippedHash> StrippedHash for Stripped<T> {
+	fn stripped_hash<H: Hasher>(&self, state: &mut H) {
+		self.0.stripped_hash(state)
+	}
+}
+
 impl<'t, T: StrippedHash> StrippedHash for &'t T {
 	fn stripped_hash<H: Hasher>(&self, state: &mut H) {
 		T::stripped_hash(*self, state)

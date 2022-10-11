@@ -41,6 +41,12 @@ impl<T: StrippedPartialEq<U>, U> PartialEq<Stripped<U>> for Stripped<T> {
 	}
 }
 
+impl<T: StrippedPartialEq<U>, U> StrippedPartialEq<Stripped<U>> for Stripped<T> {
+	fn stripped_eq(&self, other: &Stripped<U>) -> bool {
+		self.0.stripped_eq(&other.0)
+	}
+}
+
 impl<'u, 't, U, T: StrippedPartialEq<U>> StrippedPartialEq<&'u U> for &'t T {
 	fn stripped_eq(&self, other: &&'u U) -> bool {
 		T::stripped_eq(*self, *other)

@@ -14,6 +14,12 @@ impl<T: StrippedPartialOrd<U>, U> PartialOrd<Stripped<U>> for Stripped<T> {
 	}
 }
 
+impl<T: StrippedPartialOrd<U>, U> StrippedPartialOrd<Stripped<U>> for Stripped<T> {
+	fn stripped_partial_cmp(&self, other: &Stripped<U>) -> Option<Ordering> {
+		self.0.stripped_partial_cmp(&other.0)
+	}
+}
+
 impl<'u, 't, U, T: StrippedPartialOrd<U>> StrippedPartialOrd<&'u U> for &'t T {
 	fn stripped_partial_cmp(&self, other: &&'u U) -> Option<Ordering> {
 		T::stripped_partial_cmp(*self, *other)

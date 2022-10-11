@@ -9,6 +9,8 @@ pub trait StrippedEq: StrippedPartialEq {}
 
 impl<T: StrippedEq> Eq for Stripped<T> {}
 
+impl<T: StrippedEq> StrippedEq for Stripped<T> {}
+
 impl<'t, T: StrippedEq> StrippedEq for &'t T {}
 
 impl<T: StrippedEq, M> StrippedEq for Meta<T, M> {}
