@@ -1,5 +1,7 @@
 use super::Stripped;
 use crate::Meta;
+use std::collections::HashMap;
+use std::hash::Hash;
 
 /// Defines the equality of values
 /// without considering the metadata.
@@ -70,5 +72,14 @@ impl<T: StrippedPartialEq<U>, U> StrippedPartialEq<Option<U>> for Option<T> {
 impl<T: StrippedPartialEq<U>, U> StrippedPartialEq<Vec<U>> for Vec<T> {
 	fn stripped_eq(&self, other: &Vec<U>) -> bool {
 		self.len() == other.len() && self.iter().zip(other).all(|(a, b)| a.stripped_eq(b))
+	}
+}
+
+impl<K: Eq + Hash, V: StrippedPartialEq<W>, W> StrippedPartialEq<HashMap<K, W>> for HashMap<K, V> {
+	fn stripped_eq(&self, other: &HashMap<K, W>) -> bool {
+		self.len() == other.len()
+			&& self
+				.iter()
+				.all(|(key, value)| other.get(key).map_or(false, |v| value.stripped_eq(v)))
 	}
 }
