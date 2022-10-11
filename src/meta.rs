@@ -193,6 +193,12 @@ where
 	}
 }
 
+impl<'t, 'm, T: Clone, M: Clone> Meta<&'t T, &'m M> {
+	pub fn cloned(&self) -> Meta<T, M> {
+		Meta(self.0.clone(), self.1.clone())
+	}
+}
+
 impl<'t, T: Clone, M> Meta<&'t T, M> {
 	/// Clones the borrowed value and the file to return a new `Meta<T, F>`.
 	#[inline(always)]
@@ -207,6 +213,21 @@ impl<'t, T: Clone, M> Meta<&'t T, M> {
 	#[inline(always)]
 	pub fn into_cloned_value(self) -> Meta<T, M> {
 		Meta(self.0.clone(), self.1)
+	}
+}
+
+impl<'m, T, M: Clone> Meta<T, &'m M> {
+	#[inline(always)]
+	pub fn cloned_metadata(&self) -> Meta<T, M>
+	where
+		T: Clone,
+	{
+		Meta(self.0.clone(), self.1.clone())
+	}
+
+	#[inline(always)]
+	pub fn into_cloned_metadata(self) -> Meta<T, M> {
+		Meta(self.0, self.1.clone())
 	}
 }
 
