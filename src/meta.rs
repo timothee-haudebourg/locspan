@@ -297,6 +297,13 @@ impl<T: fmt::Display, M> fmt::Display for Meta<T, M> {
 	}
 }
 
+#[cfg(feature = "contextual")]
+impl<N, T: contextual::DisplayWithContext<N>, M> contextual::DisplayWithContext<N> for Meta<T, M> {
+	fn fmt_with(&self, context: &N, f: &mut fmt::Formatter) -> fmt::Result {
+		self.0.fmt_with(context, f)
+	}
+}
+
 /// Provides the `at` function to locate any value.
 ///
 /// This trait is implemented for all types.
