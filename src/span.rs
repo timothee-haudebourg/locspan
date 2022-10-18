@@ -216,9 +216,25 @@ pub trait Spanned {
 	fn span(&self) -> Self::Span;
 }
 
+impl Spanned for Span {
+	type Span = Self;
+
+	fn span(&self) -> Self::Span {
+		*self
+	}
+}
+
 /// Value with an optional span.
 pub trait MaybeSpanned {
 	type Span;
 
 	fn optional_span(&self) -> Option<Self::Span>;
+}
+
+impl MaybeSpanned for Span {
+	type Span = Self;
+
+	fn optional_span(&self) -> Option<Self::Span> {
+		Some(*self)
+	}
 }
