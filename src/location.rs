@@ -140,6 +140,15 @@ pub trait Located {
 	fn location(&self) -> &Location<Self::File, Self::Span>;
 }
 
+impl<F, S> Located for Location<F, S> {
+	type File = F;
+	type Span = S;
+
+	fn location(&self) -> &Location<Self::File, Self::Span> {
+		self
+	}
+}
+
 impl<T: Located> Spanned for T
 where
 	T::Span: Clone,
