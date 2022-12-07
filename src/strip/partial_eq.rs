@@ -89,3 +89,15 @@ impl<K: Eq + Hash, V: StrippedPartialEq<W>, W> StrippedPartialEq<HashMap<K, W>> 
 				.all(|(key, value)| other.get(key).map_or(false, |v| value.stripped_eq(v)))
 	}
 }
+
+#[cfg(feature = "hashbrown")]
+impl<K: Eq + Hash, V: StrippedPartialEq<W>, W> StrippedPartialEq<hashbrown::HashMap<K, W>>
+	for hashbrown::HashMap<K, V>
+{
+	fn stripped_eq(&self, other: &hashbrown::HashMap<K, W>) -> bool {
+		self.len() == other.len()
+			&& self
+				.iter()
+				.all(|(key, value)| other.get(key).map_or(false, |v| value.stripped_eq(v)))
+	}
+}

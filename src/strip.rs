@@ -69,6 +69,18 @@ where
 	}
 }
 
+#[cfg(feature = "hashbrown")]
+impl<T: Strip> Strip for hashbrown::HashSet<T>
+where
+	T::Stripped: Hash + Eq,
+{
+	type Stripped = hashbrown::HashSet<T::Stripped>;
+
+	fn strip(self) -> Self::Stripped {
+		self.into_iter().map(T::strip).collect()
+	}
+}
+
 impl<T: Strip> Strip for BTreeSet<T>
 where
 	T::Stripped: Ord,
