@@ -304,6 +304,12 @@ impl<N, T: contextual::DisplayWithContext<N>, M> contextual::DisplayWithContext<
 	}
 }
 
+impl<T: 'static + std::error::Error, M: fmt::Debug> std::error::Error for Meta<T, M> {
+	fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+		Some(&self.0)
+	}
+}
+
 /// Provides the `at` function to locate any value.
 ///
 /// This trait is implemented for all types.
