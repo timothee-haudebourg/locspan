@@ -8,7 +8,7 @@ use std::ops::{Deref, DerefMut};
 ///
 /// It is a tuple struct so it can be easily deconstructed using pattern matching.
 #[derive(Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord, Debug)]
-pub struct Meta<T, M>(pub T, pub M);
+pub struct Meta<T, M = ()>(pub T, pub M);
 
 impl<T, M> Meta<T, M> {
 	/// Creates a new value attached to its metadata.
@@ -181,6 +181,13 @@ impl<T, M> Meta<T, M> {
 		T: Clone,
 	{
 		Meta(self.0.clone(), &self.1)
+	}
+}
+
+impl<T> Meta<T> {
+	/// Creates a value without metadata.
+	pub fn none(value: T) -> Self {
+		Self(value, ())
 	}
 }
 
