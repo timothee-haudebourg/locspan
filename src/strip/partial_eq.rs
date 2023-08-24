@@ -101,3 +101,15 @@ impl<K: Eq + Hash, V: StrippedPartialEq<W>, W> StrippedPartialEq<hashbrown::Hash
 				.all(|(key, value)| other.get(key).map_or(false, |v| value.stripped_eq(v)))
 	}
 }
+
+#[cfg(feature = "indexmap")]
+impl<K: Eq + Hash, V: StrippedPartialEq<W>, W> StrippedPartialEq<indexmap::IndexMap<K, W>>
+	for indexmap::IndexMap<K, V>
+{
+	fn stripped_eq(&self, other: &indexmap::IndexMap<K, W>) -> bool {
+		self.len() == other.len()
+			&& self
+				.iter()
+				.all(|(key, value)| other.get(key).map_or(false, |v| value.stripped_eq(v)))
+	}
+}

@@ -25,3 +25,6 @@ impl<K: Eq + Hash, V: StrippedEq> StrippedEq for HashMap<K, V> {}
 
 #[cfg(feature = "hashbrown")]
 impl<K: Eq + Hash, V: StrippedEq> StrippedEq for hashbrown::HashMap<K, V> {}
+
+#[cfg(feature = "indexmap")]
+impl<K: Eq + Hash, V: StrippedEq> StrippedEq for indexmap::IndexMap<K, V> {}

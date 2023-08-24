@@ -81,6 +81,18 @@ where
 	}
 }
 
+#[cfg(feature = "indexmap")]
+impl<T: Strip> Strip for indexmap::IndexSet<T>
+where
+	T::Stripped: Hash + Eq,
+{
+	type Stripped = indexmap::IndexSet<T::Stripped>;
+
+	fn strip(self) -> Self::Stripped {
+		self.into_iter().map(T::strip).collect()
+	}
+}
+
 impl<T: Strip> Strip for BTreeSet<T>
 where
 	T::Stripped: Ord,
