@@ -17,6 +17,9 @@ mod strip;
 #[cfg(feature = "reporting")]
 mod reporting;
 
+#[cfg(feature = "serde")]
+mod serde;
+
 pub use loc::*;
 pub use location::*;
 pub use meta::*;
