@@ -96,7 +96,20 @@ impl<T, M> Meta<T, M> {
 		T: MapMetadataRecursively<M, N>,
 	{
 		let meta = f(self.1);
-		Meta(self.0.map_metadata_recursively(f), meta)
+		Meta(self.0.map_metadata_recursively::<F>(f), meta)
+	}
+
+	/// Maps the metadata of a recursive data structure.
+	#[inline(always)]
+	pub(crate) fn map_metadata_recursively_mut_ref<N, F: FnMut(M) -> N>(
+		self,
+		f: &mut F,
+	) -> Meta<T::Output, N>
+	where
+		T: MapMetadataRecursively<M, N>,
+	{
+		let meta = f(self.1);
+		Meta(self.0.map_metadata_recursively_mut_ref::<F>(f), meta)
 	}
 
 	/// Tries to maps the metadata.
@@ -119,6 +132,22 @@ impl<T, M> Meta<T, M> {
 	{
 		let meta = f(self.1)?;
 		Ok(Meta(self.0.try_map_metadata_recursively(f)?, meta))
+	}
+
+	/// Tries to map the metadata of a recursive data structure.
+	#[inline(always)]
+	pub(crate) fn try_map_metadata_recursively_mut_ref<N, E, F: FnMut(M) -> Result<N, E>>(
+		self,
+		f: &mut F,
+	) -> Result<Meta<T::Output, N>, E>
+	where
+		T: TryMapMetadataRecursively<M, N, E>,
+	{
+		let meta = f(self.1)?;
+		Ok(Meta(
+			self.0.try_map_metadata_recursively_mut_ref::<F>(f)?,
+			meta,
+		))
 	}
 
 	/// Cast the metadata.
@@ -369,7 +398,7 @@ where
 	where
 		F: FnMut(M) -> N,
 	{
-		self.map_metadata_recursively(f)
+		self.map_metadata_recursively_mut_ref::<N, F>(f)
 	}
 }
 
@@ -407,10 +436,7 @@ where
 	where
 		F: FnMut(M) -> Result<N, E>,
 	{
-		Ok(Meta(
-			T::try_map_metadata_recursively_mut_ref(self.0, f)?,
-			f(self.1)?,
-		))
+		self.try_map_metadata_recursively_mut_ref::<N, E, F>(f)
 	}
 }
 
