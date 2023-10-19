@@ -336,11 +336,21 @@ impl<T> At for T {
 }
 
 /// Provides a function to map the metadata inside a recursive data structure.
-pub trait MapMetadataRecursively<M, N> {
+pub trait MapMetadataRecursively<M, N>: Sized {
 	type Output;
 
 	/// Maps the metadata, recursively.
-	fn map_metadata_recursively<F: FnMut(M) -> N>(self, f: F) -> Self::Output;
+	fn map_metadata_recursively(self, mut f: impl FnMut(M) -> N) -> Self::Output {
+		self.map_metadata_recursively_mut_ref(&mut f)
+	}
+
+	/// Maps the metadata, recursively, using a mutable reference to the mapping
+	/// function.
+	///
+	/// This should be implemented instead of `map_metadata_recursively` to
+	/// prevent statically instantiating infinitely many function types at
+	/// compile time for recursive types.
+	fn map_metadata_recursively_mut_ref(self, f: &mut impl FnMut(M) -> N) -> Self::Output;
 }
 
 impl<T, M, N> MapMetadataRecursively<M, N> for Meta<T, M>
@@ -350,19 +360,32 @@ where
 	type Output = Meta<T::Output, N>;
 
 	#[inline(always)]
-	fn map_metadata_recursively<F: FnMut(M) -> N>(self, f: F) -> Self::Output {
+	fn map_metadata_recursively_mut_ref(self, f: &mut impl FnMut(M) -> N) -> Self::Output {
 		self.map_metadata_recursively(f)
 	}
 }
 
 /// Provides a function that tries to map the metadata inside a recursive data structure.
-pub trait TryMapMetadataRecursively<M, N, E> {
+pub trait TryMapMetadataRecursively<M, N, E>: Sized {
 	type Output;
 
 	/// Tries to map the metadata, recursively.
-	fn try_map_metadata_recursively<F: FnMut(M) -> Result<N, E>>(
+	fn try_map_metadata_recursively(
 		self,
-		f: F,
+		mut f: impl FnMut(M) -> Result<N, E>,
+	) -> Result<Self::Output, E> {
+		self.try_map_metadata_recursively_mut_ref(&mut f)
+	}
+
+	/// Tries to map the metadata, recursively, using a mutable reference to the
+	/// mapping function.
+	///
+	/// This should be implemented instead of `try_map_metadata_recursively` to
+	/// prevent statically instantiating infinitely many function types at
+	/// compile time for recursive types.
+	fn try_map_metadata_recursively_mut_ref(
+		self,
+		f: &mut impl FnMut(M) -> Result<N, E>,
 	) -> Result<Self::Output, E>;
 }
 
@@ -373,11 +396,14 @@ where
 	type Output = Meta<T::Output, N>;
 
 	#[inline(always)]
-	fn try_map_metadata_recursively<F: FnMut(M) -> Result<N, E>>(
+	fn try_map_metadata_recursively_mut_ref(
 		self,
-		f: F,
+		f: &mut impl FnMut(M) -> Result<N, E>,
 	) -> Result<Self::Output, E> {
-		self.try_map_metadata_recursively(f)
+		Ok(Meta(
+			T::try_map_metadata_recursively_mut_ref(self.0, f)?,
+			f(self.1)?,
+		))
 	}
 }
 
