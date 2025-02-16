@@ -7,10 +7,10 @@ use std::ops::{Index, IndexMut, Range};
 #[derive(Default, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord, Debug)]
 pub struct Span {
 	/// Start byte (included).
-	start: usize,
+	pub start: usize,
 
 	/// End byte (excluded).
-	end: usize,
+	pub end: usize,
 }
 
 impl Span {
@@ -29,7 +29,11 @@ impl Span {
 	/// Size of the span in bytes.
 	#[inline(always)]
 	pub fn len(&self) -> usize {
-		self.end - self.start
+		if self.start > self.end {
+			0
+		} else {
+			self.end - self.start
+		}
 	}
 
 	/// Checks if the span is empty.
@@ -42,20 +46,6 @@ impl Span {
 		self.end == self.start
 	}
 
-	/// Returns the index of the first byte in the span.
-	#[inline(always)]
-	pub fn start(&self) -> usize {
-		self.start
-	}
-
-	/// Returns the index of the first byte *after* the span.
-	///
-	/// This can never be lower than [`Self::start`].
-	#[inline(always)]
-	pub fn end(&self) -> usize {
-		self.end
-	}
-
 	/// Returns the range of bytes inside the span.
 	#[inline(always)]
 	pub fn range(&self) -> Range<usize> {
@@ -66,24 +56,6 @@ impl Span {
 	#[inline(always)]
 	pub fn contains(&self, index: usize) -> bool {
 		self.start >= index && index < self.end
-	}
-
-	/// Sets the index of the first byte in the span.
-	///
-	/// If the end position of the span is lower that `start`,
-	/// then it is also changed into `start`.
-	#[inline(always)]
-	pub fn set_start(&mut self, start: usize) {
-		self.start = start;
-		self.end = std::cmp::max(start, self.end);
-	}
-
-	/// Sets the index of the first byte *after* the span.
-	///
-	/// If `end` is lower that the start position, the start position is used instead.
-	#[inline(always)]
-	pub fn set_end(&mut self, end: usize) {
-		self.end = std::cmp::max(self.start, end);
 	}
 
 	/// Computes the union of two spans.

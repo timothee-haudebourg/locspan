@@ -6,10 +6,10 @@ use crate::{MaybeSpanned, Span, Spanned};
 #[derive(Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord, Debug)]
 pub struct Location<F> {
 	/// File id.
-	file: F,
+	pub file: F,
 
 	/// Span.
-	span: Span,
+	pub span: Span,
 }
 
 impl<F> Location<F> {
@@ -36,44 +36,6 @@ impl<F> Location<F> {
 	#[inline(always)]
 	pub fn into_span(self) -> Span {
 		self.span
-	}
-
-	/// Returns a reference to the file's identifier.
-	#[inline(always)]
-	pub fn file(&self) -> &F {
-		&self.file
-	}
-
-	/// Returns a mutable reference to the file's identifier.
-	#[inline(always)]
-	pub fn file_mut(&mut self) -> &mut F {
-		&mut self.file
-	}
-
-	/// Sets the file and returns the previous one.
-	#[inline(always)]
-	pub fn set_file(&mut self, mut file: F) -> F {
-		std::mem::swap(&mut self.file, &mut file);
-		file
-	}
-
-	/// Returns the `Span` in the file.
-	#[inline(always)]
-	pub fn span(&self) -> Span {
-		self.span
-	}
-
-	/// Returns a mutable reference to the span.
-	#[inline(always)]
-	pub fn span_mut(&mut self) -> &mut Span {
-		&mut self.span
-	}
-
-	/// Sets the span and returns the previous one.
-	#[inline(always)]
-	pub fn set_span(&mut self, mut span: Span) -> Span {
-		std::mem::swap(&mut self.span, &mut span);
-		span
 	}
 
 	/// Maps the file identifier.
@@ -105,7 +67,7 @@ impl<F> Location<F> {
 	/// Sets the end of the location span to `end`, and returns itself.
 	#[inline(always)]
 	pub fn until(mut self, end: usize) -> Self {
-		self.span.set_end(end);
+		self.span.end = end;
 		self
 	}
 
@@ -142,7 +104,7 @@ impl<F> Located for Location<F> {
 
 impl<T: Located> Spanned for T {
 	fn span(&self) -> Span {
-		self.location().span()
+		self.location().span
 	}
 }
 
