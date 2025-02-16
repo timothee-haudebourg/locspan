@@ -60,7 +60,7 @@ impl<F> Location<F> {
 	/// Returns the `Span` in the file.
 	#[inline(always)]
 	pub fn span(&self) -> Span {
-		self.span.clone()
+		self.span
 	}
 
 	/// Returns a mutable reference to the span.
@@ -88,7 +88,7 @@ impl<F> Location<F> {
 	/// Copies the span and borrows the file to create a new `Location<&F>`.
 	#[inline(always)]
 	pub fn as_ref(&self) -> Location<&F> {
-		Location::new(&self.file, self.span.clone())
+		Location::new(&self.file, self.span)
 	}
 
 	/// Converts the location.
@@ -97,7 +97,7 @@ impl<F> Location<F> {
 	where
 		F: Into<G>,
 	{
-		Location::new(self.file.into(), self.span.into())
+		Location::new(self.file.into(), self.span)
 	}
 }
 
@@ -117,11 +117,11 @@ impl<F> Location<F> {
 	}
 }
 
-impl<'a, F: Clone> Location<&'a F> {
+impl<F: Clone> Location<&F> {
 	/// Clones the borrowed file to return a new `Location<F>`.
 	#[inline(always)]
 	pub fn cloned(&self) -> Location<F> {
-		Location::new(self.file.clone(), self.span.clone())
+		Location::new(self.file.clone(), self.span)
 	}
 }
 

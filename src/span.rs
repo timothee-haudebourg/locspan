@@ -172,7 +172,7 @@ impl IntoIterator for Span {
 	}
 }
 
-impl<'a> IntoIterator for &'a Span {
+impl IntoIterator for &Span {
 	type Item = usize;
 	type IntoIter = Range<usize>;
 
