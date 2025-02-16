@@ -211,30 +211,22 @@ impl IndexMut<Span> for String {
 
 /// Value with a span.
 pub trait Spanned {
-	type Span;
-
-	fn span(&self) -> Self::Span;
+	fn span(&self) -> Span;
 }
 
 impl Spanned for Span {
-	type Span = Self;
-
-	fn span(&self) -> Self::Span {
+	fn span(&self) -> Span {
 		*self
 	}
 }
 
 /// Value with an optional span.
 pub trait MaybeSpanned {
-	type Span;
-
-	fn optional_span(&self) -> Option<Self::Span>;
+	fn optional_span(&self) -> Option<Span>;
 }
 
 impl MaybeSpanned for Span {
-	type Span = Self;
-
-	fn optional_span(&self) -> Option<Self::Span> {
+	fn optional_span(&self) -> Option<Span> {
 		Some(*self)
 	}
 }

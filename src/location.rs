@@ -4,25 +4,25 @@ use crate::{MaybeSpanned, Span, Spanned};
 ///
 /// Provides a file identifier (of type `F`) and a [`Span`] in this file.
 #[derive(Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord, Debug)]
-pub struct Location<F, S = Span> {
+pub struct Location<F> {
 	/// File id.
 	file: F,
 
 	/// Span.
-	span: S,
+	span: Span,
 }
 
-impl<F, S> Location<F, S> {
+impl<F> Location<F> {
 	/// Creates a new location referring to the given `span` in the given `file`.
 	#[inline(always)]
-	pub fn new(file: F, span: S) -> Self {
+	pub fn new(file: F, span: Span) -> Self {
 		Self { file, span }
 	}
 
 	/// Consumes this location and returns a pair
 	/// containing the file and span.
 	#[inline(always)]
-	pub fn into_parts(self) -> (F, S) {
+	pub fn into_parts(self) -> (F, Span) {
 		(self.file, self.span)
 	}
 
@@ -34,7 +34,7 @@ impl<F, S> Location<F, S> {
 
 	/// Consumes this location and returns the span.
 	#[inline(always)]
-	pub fn into_span(self) -> S {
+	pub fn into_span(self) -> Span {
 		self.span
 	}
 
@@ -59,29 +59,26 @@ impl<F, S> Location<F, S> {
 
 	/// Returns the `Span` in the file.
 	#[inline(always)]
-	pub fn span(&self) -> S
-	where
-		S: Clone,
-	{
+	pub fn span(&self) -> Span {
 		self.span.clone()
 	}
 
 	/// Returns a mutable reference to the span.
 	#[inline(always)]
-	pub fn span_mut(&mut self) -> &mut S {
+	pub fn span_mut(&mut self) -> &mut Span {
 		&mut self.span
 	}
 
 	/// Sets the span and returns the previous one.
 	#[inline(always)]
-	pub fn set_span(&mut self, mut span: S) -> S {
+	pub fn set_span(&mut self, mut span: Span) -> Span {
 		std::mem::swap(&mut self.span, &mut span);
 		span
 	}
 
 	/// Maps the file identifier.
 	#[inline(always)]
-	pub fn map_file<G>(self, f: impl FnOnce(F) -> G) -> Location<G, S> {
+	pub fn map<G>(self, f: impl FnOnce(F) -> G) -> Location<G> {
 		Location {
 			file: f(self.file),
 			span: self.span,
@@ -90,19 +87,15 @@ impl<F, S> Location<F, S> {
 
 	/// Copies the span and borrows the file to create a new `Location<&F>`.
 	#[inline(always)]
-	pub fn borrow(&self) -> Location<&F, S>
-	where
-		S: Clone,
-	{
+	pub fn as_ref(&self) -> Location<&F> {
 		Location::new(&self.file, self.span.clone())
 	}
 
 	/// Converts the location.
 	#[inline(always)]
-	pub fn cast<G, P>(self) -> Location<G, P>
+	pub fn cast<G>(self) -> Location<G>
 	where
 		F: Into<G>,
-		S: Into<P>,
 	{
 		Location::new(self.file.into(), self.span.into())
 	}
@@ -124,10 +117,10 @@ impl<F> Location<F> {
 	}
 }
 
-impl<'a, F: Clone, S: Clone> Location<&'a F, S> {
+impl<'a, F: Clone> Location<&'a F> {
 	/// Clones the borrowed file to return a new `Location<F>`.
 	#[inline(always)]
-	pub fn cloned(&self) -> Location<F, S> {
+	pub fn cloned(&self) -> Location<F> {
 		Location::new(self.file.clone(), self.span.clone())
 	}
 }
@@ -135,27 +128,20 @@ impl<'a, F: Clone, S: Clone> Location<&'a F, S> {
 /// Value with a location.
 pub trait Located {
 	type File;
-	type Span;
 
-	fn location(&self) -> &Location<Self::File, Self::Span>;
+	fn location(&self) -> Location<&Self::File>;
 }
 
-impl<F, S> Located for Location<F, S> {
+impl<F> Located for Location<F> {
 	type File = F;
-	type Span = S;
 
-	fn location(&self) -> &Location<Self::File, Self::Span> {
-		self
+	fn location(&self) -> Location<&Self::File> {
+		self.as_ref()
 	}
 }
 
-impl<T: Located> Spanned for T
-where
-	T::Span: Clone,
-{
-	type Span = T::Span;
-
-	fn span(&self) -> Self::Span {
+impl<T: Located> Spanned for T {
+	fn span(&self) -> Span {
 		self.location().span()
 	}
 }
@@ -163,36 +149,20 @@ where
 /// Value with an optional location.
 pub trait MaybeLocated {
 	type File;
-	type Span;
 
-	fn optional_location(&self) -> Option<&Location<Self::File, Self::Span>>;
+	fn optional_location(&self) -> Option<Location<&Self::File>>;
 }
 
-impl<T: MaybeLocated> MaybeSpanned for T
-where
-	T::Span: Clone,
-{
-	type Span = T::Span;
-
-	fn optional_span(&self) -> Option<Self::Span> {
-		self.optional_location().map(Location::span)
+impl<T: MaybeLocated> MaybeSpanned for T {
+	fn optional_span(&self) -> Option<Span> {
+		self.optional_location().map(Location::into_span)
 	}
 }
 
 impl<T: Located> MaybeLocated for T {
 	type File = T::File;
-	type Span = T::Span;
 
-	fn optional_location(&self) -> Option<&Location<Self::File, Self::Span>> {
+	fn optional_location(&self) -> Option<Location<&Self::File>> {
 		Some(self.location())
-	}
-}
-
-impl<T, F, S> Located for (T, Location<F, S>) {
-	type File = F;
-	type Span = S;
-
-	fn location(&self) -> &Location<Self::File, Self::Span> {
-		&self.1
 	}
 }
