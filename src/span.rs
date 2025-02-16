@@ -238,25 +238,3 @@ impl MaybeSpanned for Span {
 		Some(*self)
 	}
 }
-
-/// Value with a mutable span.
-pub trait SpannedMut: Spanned {
-	fn span_mut(&mut self) -> &mut Self::Span;
-}
-
-impl SpannedMut for Span {
-	fn span_mut(&mut self) -> &mut Self::Span {
-		self
-	}
-}
-
-/// Value with an optional span.
-pub trait MaybeSpannedMut: MaybeSpanned {
-	fn optional_span_mut(&mut self) -> Option<&mut Self::Span>;
-}
-
-impl MaybeSpannedMut for Span {
-	fn optional_span_mut(&mut self) -> Option<&mut Self::Span> {
-		Some(self)
-	}
-}

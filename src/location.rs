@@ -1,4 +1,4 @@
-use crate::{MaybeSpanned, Meta, Span, Spanned};
+use crate::{MaybeSpanned, Span, Spanned};
 
 /// Syntax element location.
 ///
@@ -188,11 +188,11 @@ impl<T: Located> MaybeLocated for T {
 	}
 }
 
-impl<T, F, S> Located for Meta<T, Location<F, S>> {
+impl<T, F, S> Located for (T, Location<F, S>) {
 	type File = F;
 	type Span = S;
 
 	fn location(&self) -> &Location<Self::File, Self::Span> {
-		self.metadata()
+		&self.1
 	}
 }
